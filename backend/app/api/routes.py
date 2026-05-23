@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.core.config import settings
 from app.database.session import SessionLocal
 from app.services.redis_service import check_redis_connection
+from app.api.v1.auth import router as auth_router
 
 router = APIRouter()
 
@@ -54,3 +55,7 @@ async def system_info() -> dict[str, object]:
             "Health check routes",
         ],
     }
+
+
+# include auth routes (v1)
+router.include_router(auth_router)

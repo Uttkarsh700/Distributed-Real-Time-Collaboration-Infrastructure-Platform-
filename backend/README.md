@@ -67,6 +67,49 @@ uvicorn app.main:app --reload --port 8000
 - http://localhost:8000/system/info
 - http://localhost:8000/docs
 
+## Authentication Setup - Step 4
+
+The backend now includes a basic JWT authentication system for local development.
+
+Endpoints
+
+- Register: `POST /api/v1/auth/register`
+- Login: `POST /api/v1/auth/login` (form data: `username`, `password`)
+- Current user: `GET /api/v1/auth/me` (requires `Authorization: Bearer <token>`)
+
+Quick test commands:
+
+Start backend:
+
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+Register user:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/register \
+	-H "Content-Type: application/json" \
+	-d "{\"email\":\"test@cloudcollab.dev\",\"full_name\":\"Test User\",\"password\":\"password123\"}"
+```
+
+Login user:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/login \
+	-H "Content-Type: application/x-www-form-urlencoded" \
+	-d "username=test@cloudcollab.dev&password=password123"
+```
+
+Get current user (replace YOUR_ACCESS_TOKEN):
+
+```bash
+curl -X GET http://localhost:8000/api/v1/auth/me \
+	-H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Swagger docs can also be used to test login at `http://localhost:8000/docs`.
+
 ## Database Setup - Step 3
 
 This step adds the first SQLAlchemy schema, Alembic migrations, and a simple local seed script.

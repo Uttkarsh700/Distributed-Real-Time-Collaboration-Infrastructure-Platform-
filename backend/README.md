@@ -110,6 +110,42 @@ curl -X GET http://localhost:8000/api/v1/auth/me \
 
 Swagger docs can also be used to test login at `http://localhost:8000/docs`.
 
+## Workspace APIs - Step 5
+
+Workspaces are team containers for projects and membership. Roles are simple: `owner`, `admin`, `developer`, `viewer`.
+
+Available routes:
+
+- Create: `POST /api/v1/workspaces/` (any authenticated user)
+- List: `GET /api/v1/workspaces/` (current user's workspaces)
+- Get: `GET /api/v1/workspaces/{workspace_id}` (members only)
+- Update: `PATCH /api/v1/workspaces/{workspace_id}` (owner/admin)
+- Delete: `DELETE /api/v1/workspaces/{workspace_id}` (owner only)
+- List members: `GET /api/v1/workspaces/{workspace_id}/members` (members only)
+
+Example: create workspace
+
+```bash
+curl -X POST http://localhost:8000/api/v1/workspaces/ \
+	-H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+	-H "Content-Type: application/json" \
+	-d '{"name":"Uttkarsh Cloud Lab","description":"Demo collaborative cloud workspace"}'
+```
+
+Example: list workspaces
+
+```bash
+curl -X GET http://localhost:8000/api/v1/workspaces/ \
+	-H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Example: get members
+
+```bash
+curl -X GET http://localhost:8000/api/v1/workspaces/WORKSPACE_ID/members \
+	-H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
 ## Database Setup - Step 3
 
 This step adds the first SQLAlchemy schema, Alembic migrations, and a simple local seed script.

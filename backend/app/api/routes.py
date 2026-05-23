@@ -6,6 +6,7 @@ from app.core.config import settings
 from app.database.session import SessionLocal
 from app.services.redis_service import check_redis_connection
 from app.api.v1.auth import router as auth_router
+from app.api.v1.workspaces import router as workspace_router
 
 router = APIRouter()
 
@@ -59,3 +60,4 @@ async def system_info() -> dict[str, object]:
 
 # include auth routes (v1)
 router.include_router(auth_router)
+router.include_router(workspace_router)

@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -16,25 +17,32 @@ async def health() -> dict[str, str]:
     return {"status": "ok", "service": "CloudCollab API", "version": settings.API_VERSION}
 
 
-@router.get("/health/database")
-async def health_database() -> dict[str, str]:
+def _check_db() -> None:
     db = SessionLocal()
     try:
         db.execute(text("SELECT 1"))
-        return {"status": "ok", "database": "connected"}
-    except SQLAlchemyError as exc:
-        return {"status": "error", "database": "disconnected", "detail": str(exc)}
-    except Exception as exc:
-        return {"status": "error", "database": "disconnected", "detail": str(exc)}
     finally:
         db.close()
 
 
+@router.get("/health/database")
+async def health_database() -> dict[str, str]:
+    try:
+        await run_in_threadpool(_check_db)
+        return {"status": "ok", "database": "connected"}
+    except SQLAlchemyError as exc:
+        return {"status": "error", "database": "disconnected", "detail": str(exc)}
+
+
 @router.get("/health/redis")
 async def health_redis() -> dict[str, str]:
-    if check_redis_connection():
-        return {"status": "ok", "redis": "connected"}
+    try:
+        ok = await run_in_threadpool(check_redis_connection)
+    except Exception as exc:
+        return {"status": "error", "redis": "disconnected", "detail": str(exc)}
 
+    if ok:
+        return {"status": "ok", "redis": "connected"}
     return {
         "status": "error",
         "redis": "disconnected",
@@ -58,6 +66,5 @@ async def system_info() -> dict[str, object]:
     }
 
 
-# include auth routes (v1)
-router.include_router(auth_router)
-router.include_router(workspace_router)
+router.include_router(auth_router, prefix="/auth", tags=["auth"])
+router.include_router(workspace_router, prefix="/workspaces", tags=["workspaces"])
